@@ -5,7 +5,7 @@
  */
 
 #include <string.h>
-#include <errno.h>
+#include "errno.h"
 
 #include "zcbor_bulk.h"
 

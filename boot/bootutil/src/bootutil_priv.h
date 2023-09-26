@@ -65,7 +65,8 @@ struct flash_area;
     !defined(MCUBOOT_SWAP_USING_MOVE) && \
     !defined(MCUBOOT_DIRECT_XIP) && \
     !defined(MCUBOOT_RAM_LOAD) && \
-    !defined(MCUBOOT_SINGLE_APPLICATION_SLOT)
+    !defined(MCUBOOT_SINGLE_APPLICATION_SLOT) && \
+    !defined(MCUBOOT_SWAP_USING_SCRATCH)
 #define MCUBOOT_SWAP_USING_SCRATCH 1
 #endif
 
@@ -220,7 +221,7 @@ struct boot_loader_state {
         uint32_t num_sectors;
     } imgs[BOOT_IMAGE_NUMBER][BOOT_NUM_SLOTS];
 
-#if MCUBOOT_SWAP_USING_SCRATCH
+#if defined(MCUBOOT_SWAP_USING_SCRATCH) || defined(MCUBOOT_SINGLE_APPLICATION_SLOT)
     struct {
         const struct flash_area *area;
         boot_sector_t *sectors;

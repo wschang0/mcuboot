@@ -221,7 +221,7 @@ close_all_flash_areas(struct boot_loader_state *state)
             continue;
         }
 #endif
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
         flash_area_close(BOOT_SCRATCH_AREA(state));
 #endif
         for (slot = 0; slot < BOOT_NUM_SLOTS; slot++) {
@@ -299,7 +299,7 @@ static uint32_t
 boot_write_sz(struct boot_loader_state *state)
 {
     uint32_t elem_sz;
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
     uint32_t align;
 #endif
 
@@ -308,7 +308,7 @@ boot_write_sz(struct boot_loader_state *state)
      * We need to use the bigger of those 2 values.
      */
     elem_sz = flash_area_align(BOOT_IMG_AREA(state, BOOT_PRIMARY_SLOT));
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
     align = flash_area_align(BOOT_SCRATCH_AREA(state));
     if (align > elem_sz) {
         elem_sz = align;
@@ -334,7 +334,7 @@ boot_initialize_area(struct boot_loader_state *state, int flash_area)
     } else if (flash_area == FLASH_AREA_IMAGE_SECONDARY(BOOT_CURR_IMG(state))) {
         out_sectors = BOOT_IMG(state, BOOT_SECONDARY_SLOT).sectors;
         out_num_sectors = &BOOT_IMG(state, BOOT_SECONDARY_SLOT).num_sectors;
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
     } else if (flash_area == FLASH_AREA_IMAGE_SCRATCH) {
         out_sectors = state->scratch.sectors;
         out_num_sectors = &state->scratch.num_sectors;
@@ -381,7 +381,7 @@ boot_read_sectors(struct boot_loader_state *state)
         return BOOT_EFLASH_SEC;
     }
 
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
     rc = boot_initialize_area(state, FLASH_AREA_IMAGE_SCRATCH);
     if (rc != 0) {
         return BOOT_EFLASH;
@@ -446,7 +446,7 @@ boot_write_status(const struct boot_loader_state *state, struct boot_status *bs)
      *       the primary slot!
      */
 
-#if MCUBOOT_SWAP_USING_SCRATCH
+#if defined(MCUBOOT_SWAP_USING_SCRATCH)
     if (bs->use_scratch) {
         /* Write to scratch. */
         area_id = FLASH_AREA_IMAGE_SCRATCH;
@@ -454,7 +454,7 @@ boot_write_status(const struct boot_loader_state *state, struct boot_status *bs)
 #endif
         /* Write to the primary slot. */
         area_id = FLASH_AREA_IMAGE_PRIMARY(BOOT_CURR_IMG(state));
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
     }
 #endif
 
@@ -1797,7 +1797,7 @@ boot_prepare_image_for_update(struct boot_loader_state *state,
         }
 #endif
 
-#ifdef MCUBOOT_SWAP_USING_MOVE
+#if defined(MCUBOOT_SWAP_USING_MOVE) || defined(MCUBOOT_SWAP_USING_REMAP)
         /*
          * Must re-read image headers because the boot status might
          * have been updated in the previous function call.
@@ -2019,7 +2019,7 @@ context_boot_go(struct boot_loader_state *state, struct boot_rsp *rsp)
      */
     TARGET_STATIC boot_sector_t primary_slot_sectors[BOOT_IMAGE_NUMBER][BOOT_MAX_IMG_SECTORS];
     TARGET_STATIC boot_sector_t secondary_slot_sectors[BOOT_IMAGE_NUMBER][BOOT_MAX_IMG_SECTORS];
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
     TARGET_STATIC boot_sector_t scratch_sectors[BOOT_MAX_IMG_SECTORS];
 #endif
 
@@ -2053,7 +2053,7 @@ context_boot_go(struct boot_loader_state *state, struct boot_rsp *rsp)
             primary_slot_sectors[image_index];
         BOOT_IMG(state, BOOT_SECONDARY_SLOT).sectors =
             secondary_slot_sectors[image_index];
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
         state->scratch.sectors = scratch_sectors;
 #endif
 
@@ -2065,7 +2065,7 @@ context_boot_go(struct boot_loader_state *state, struct boot_rsp *rsp)
             rc = flash_area_open(fa_id, &BOOT_IMG_AREA(state, slot));
             assert(rc == 0);
         }
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
         rc = flash_area_open(FLASH_AREA_IMAGE_SCRATCH,
                              &BOOT_SCRATCH_AREA(state));
         assert(rc == 0);

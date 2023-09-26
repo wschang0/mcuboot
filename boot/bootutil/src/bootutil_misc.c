@@ -135,7 +135,7 @@ boot_trailer_sz(uint32_t min_write_sz)
     return boot_status_sz(min_write_sz) + boot_trailer_info_sz();
 }
 
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
 /*
  * Similar to `boot_trailer_sz` but this function returns the space used to
  * store status in the scratch partition. The scratch partition only stores
@@ -152,7 +152,7 @@ boot_scratch_trailer_sz(uint32_t min_write_sz)
 int
 boot_status_entries(int image_index, const struct flash_area *fap)
 {
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
     if (flash_area_get_id(fap) == FLASH_AREA_IMAGE_SCRATCH) {
         return BOOT_STATUS_STATE_COUNT;
     } else
@@ -172,13 +172,13 @@ boot_status_off(const struct flash_area *fap)
 
     elem_sz = flash_area_align(fap);
 
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
     if (fap->fa_id == FLASH_AREA_IMAGE_SCRATCH) {
         off_from_end = boot_scratch_trailer_sz(elem_sz);
     } else {
 #endif
         off_from_end = boot_trailer_sz(elem_sz);
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
     }
 #endif
 
@@ -211,7 +211,7 @@ int
 boot_find_status(int image_index, const struct flash_area **fap)
 {
     uint8_t areas[] = {
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
         FLASH_AREA_IMAGE_SCRATCH,
 #endif
         FLASH_AREA_IMAGE_PRIMARY(image_index),

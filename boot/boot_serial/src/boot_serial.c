@@ -44,13 +44,13 @@
 #include <endian.h>
 #include <mbedtls/base64.h>
 #else
-#include <bsp/bsp.h>
-#include <hal/hal_system.h>
+//#include <bsp/bsp.h>
+//#include <hal/hal_system.h>
 #include <hal/hal_flash.h>
-#include <os/endian.h>
-#include <os/os_cputime.h>
-#include <crc/crc16.h>
-#include <base64/base64.h>
+//#include <os/endian.h>
+//#include <os/os_cputime.h>
+//#include <crc/crc16.h>
+//#include <base64/base64.h>
 #endif /* __ZEPHYR__ */
 
 #include <zcbor_decode.h>
@@ -58,8 +58,8 @@
 #include "zcbor_bulk.h"
 
 #include <flash_map_backend/flash_map_backend.h>
-#include <os/os.h>
-#include <os/os_malloc.h>
+//#include <os/os.h>
+//#include <os/os_malloc.h>
 
 #include <bootutil/image.h>
 #include <bootutil/bootutil.h>
@@ -68,12 +68,14 @@
 #include "boot_serial_priv.h"
 #include "mcuboot_config/mcuboot_config.h"
 #include "../src/bootutil_priv.h"
+#include "boot_serial_hal.h"
 
 #ifdef MCUBOOT_ENC_IMAGES
 #include "boot_serial/boot_serial_encryption.h"
 #endif
 
 #include "bootutil/boot_hooks.h"
+#include "mbedtls/base64.h"
 
 BOOT_LOG_MODULE_DECLARE(mcuboot);
 
@@ -119,6 +121,16 @@ BOOT_LOG_MODULE_DECLARE(mcuboot);
 
 #define base64_decode mbedtls_base64_decode
 #define base64_encode mbedtls_base64_encode
+#else
+#define BASE64_ENCODE_SIZE(in_size) ((((((in_size) - 1) / 3) * 4) + 4) + 1)
+#define CRC16_INITIAL_CRC       0       /* what to seed crc16 with */
+
+#define ntohs(x) (uint16_t)(__rev(x) >> 16)
+#define htons(x) ntohs(x)
+
+#define base64_decode mbedtls_base64_decode
+#define base64_encode mbedtls_base64_encode
+
 #endif
 
 #if (BOOT_IMAGE_NUMBER > 1)
@@ -1090,7 +1102,9 @@ boot_serial_output(void)
     base64_encode((unsigned char *)encoded_buf, sizeof(encoded_buf), &enc_len, (unsigned char *)buf, totlen);
     totlen = enc_len;
 #else
-    totlen = base64_encode(buf, totlen, encoded_buf, 1);
+    size_t enc_len;
+    base64_encode((unsigned char *)encoded_buf, sizeof(encoded_buf), &enc_len, (unsigned char *)buf, totlen);
+    totlen = enc_len;
 #endif
 
     out = 0;
@@ -1108,8 +1122,6 @@ boot_serial_output(void)
 
         boot_uf->write("\n", 1);
     }
-
-    BOOT_LOG_INF("TX");
 }
 
 /*
@@ -1135,11 +1147,9 @@ boot_serial_in_dec(char *in, int inlen, char *out, int *out_off, int maxout)
         return -1;
     }
 #else
-    if (*out_off + base64_decode_len(in) >= maxout) {
-        return -1;
-    }
-    rc = base64_decode(in, &out[*out_off]);
-    if (rc < 0) {
+    int err;
+    err = base64_decode((unsigned char*)&out[*out_off], maxout - *out_off, (size_t*)&rc, (unsigned char*)in, inlen);
+    if (err) {
         return -1;
     }
 #endif

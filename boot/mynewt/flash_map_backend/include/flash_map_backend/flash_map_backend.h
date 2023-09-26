@@ -48,6 +48,22 @@ struct flash_sector {
 
 int flash_area_sector_from_off(off_t off, struct flash_sector *sector);
 
+
+/****************************************************************************
+ * Name: flash_area_get_sector
+ *
+ * Description:
+ *   Retrieve the flash sector a given offset belongs to.
+ *
+ * Input Parameters:
+ *   fap - flash area structure
+ *   off - address offset.
+ *   sector - flash sector
+ *
+ * Returned Value:
+ *   Returns 0 on success, or an error code on failure.
+ *
+ ****************************************************************************/
 static inline int flash_area_get_sector(const struct flash_area *fa, off_t off,
     struct flash_sector *sector)
 {

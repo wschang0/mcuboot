@@ -21,7 +21,7 @@
 
 #include "mcuboot_config/mcuboot_config.h"
 
-#if defined(MCUBOOT_SWAP_USING_SCRATCH) || defined(MCUBOOT_SWAP_USING_MOVE)
+#if defined(MCUBOOT_SWAP_USING_SCRATCH) || defined(MCUBOOT_SWAP_USING_MOVE) || defined(MCUBOOT_SINGLE_APPLICATION_SLOT)
 
 /**
  * Calculates the amount of space required to store the trailer, and erases
@@ -90,7 +90,7 @@ void swap_run(struct boot_loader_state *state,
               struct boot_status *bs,
               uint32_t copy_size);
 
-#if MCUBOOT_SWAP_USING_SCRATCH
+#if defined(MCUBOOT_SWAP_USING_SCRATCH) || defined(MCUBOOT_SINGLE_APPLICATION_SLOT)
 #define BOOT_SCRATCH_AREA(state) ((state)->scratch.area)
 
 static inline size_t boot_scratch_area_size(const struct boot_loader_state *state)
@@ -99,7 +99,7 @@ static inline size_t boot_scratch_area_size(const struct boot_loader_state *stat
 }
 #endif
 
-#endif /* defined(MCUBOOT_SWAP_USING_SCRATCH) || defined(MCUBOOT_SWAP_USING_MOVE) */
+#endif /* defined(MCUBOOT_SWAP_USING_SCRATCH) || defined(MCUBOOT_SWAP_USING_MOVE) || defined(MCUBOOT_SINGLE_APPLICATION_SLOT)*/
 
 /**
  * Returns the maximum size of an application that can be loaded to a slot.

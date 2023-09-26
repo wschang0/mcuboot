@@ -30,7 +30,7 @@
 
 BOOT_LOG_MODULE_DECLARE(mcuboot);
 
-#if defined(MCUBOOT_SWAP_USING_SCRATCH) || defined(MCUBOOT_SWAP_USING_MOVE)
+#if defined(MCUBOOT_SWAP_USING_SCRATCH) || defined(MCUBOOT_SWAP_USING_MOVE) || defined(MCUBOOT_SINGLE_APPLICATION_SLOT)
 int
 swap_erase_trailer_sectors(const struct boot_loader_state *state,
                            const struct flash_area *fap)
@@ -141,7 +141,7 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
     case BOOT_STATUS_SOURCE_NONE:
         return 0;
 
-#if MCUBOOT_SWAP_USING_SCRATCH
+#ifdef MCUBOOT_SWAP_USING_SCRATCH
     case BOOT_STATUS_SOURCE_SCRATCH:
         area_id = FLASH_AREA_IMAGE_SCRATCH;
         break;

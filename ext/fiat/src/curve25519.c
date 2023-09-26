@@ -33,6 +33,8 @@
 
 #include <mcuboot_config/mcuboot_config.h>
 
+#ifdef MCUBOOT_ENCRYPT_X25519
+
 #if defined(MCUBOOT_USE_MBED_TLS)
 #include <mbedtls/platform_util.h>
 #include <mbedtls/sha512.h>
@@ -1313,3 +1315,4 @@ int X25519(uint8_t out_shared_key[32], const uint8_t private_key[32],
   // The all-zero output results when the input is a point of small order.
   return CRYPTO_memcmp(kZeros, out_shared_key, 32) != 0;
 }
+#endif // MCUBOOT_ENCRYPT_X25519
